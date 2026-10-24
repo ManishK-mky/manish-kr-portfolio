@@ -32,7 +32,8 @@ export const sampleSettings = {
   siteTitle: 'Manish Kumar — Software Engineer',
   siteDescription:
     'Portfolio of Manish Kumar, a software engineer at Appinventiv building web applications with React, Next.js, Node.js and MongoDB.',
-  siteUrl: 'http://localhost:3000',
+  // Empty: the frontend then uses NEXT_PUBLIC_SITE_URL / the Vercel production domain.
+  siteUrl: '',
   keywords: ['Manish Kumar', 'software engineer', 'MERN', 'React', 'Next.js', 'Node.js', 'portfolio'],
   footerTagline: 'Software engineer building fast, thoughtful web applications.',
   contactHeadline: 'Have a project or a role in mind? Let’s talk.',

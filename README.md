@@ -143,7 +143,45 @@ The media library refuses to delete an asset that any record still uses.
 
 ## Deployment
 
-### Backend (Render, Railway, Fly.io or any Node host)
+### Recommended: one Vercel project with Vercel Services
+
+[`vercel.json`](vercel.json) deploys both apps as one project on one domain:
+
+| Service | Root | Public paths | Calls |
+| --- | --- | --- | --- |
+| `web` (Next.js) | `frontend/my-app` | everything else (`/`) | `api`, via binding `API_SERVICE_URL` (server rendering) |
+| `api` (NestJS) | `backend/my-nest-project` | `/api/v1/*`, `/api/docs` | `web`, via binding `WEB_SERVICE_URL` (revalidation webhook) |
+
+The browser calls `/api/v1` on the same origin, so cookies and CSRF checks work
+without any CORS setup, preview deployments included. Server-to-server calls go
+over the internal bindings, which Vercel injects. Don't set those variables yourself.
+
+1. Import the repo on Vercel and keep the Root Directory as the repo root, so
+   Vercel picks up `vercel.json`.
+2. Project environment variables (shared by both services):
+   `MONGODB_URI`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `REVALIDATE_SECRET`,
+   the `CLOUDINARY_*` keys, and optionally `NEXT_PUBLIC_SITE_URL=https://yourdomain.com`.
+   **Don't** set `API_INTERNAL_URL` or `FRONTEND_REVALIDATE_URL`, because they
+   override the bindings.
+3. In MongoDB Atlas, open **Network Access** to `0.0.0.0/0`. Vercel Functions
+   have no fixed IPs.
+4. In the admin, leave **Settings → Canonical site URL** empty (the production
+   domain is used), or set it to your custom domain.
+
+Notes:
+
+- Bindings don't resolve during builds, so `next build` reads content from the
+  current production deployment's public API. On the very first deploy there
+  isn't one yet: pages build with fallback content and fill in within a minute
+  of the first visits.
+- The API runs as a Vercel Function, so the in-process scheduler
+  (`@nestjs/schedule`) doesn't run. Scheduled posts still go live at their
+  time, but the cached pages only refresh on the next edit or within an hour.
+- Rate-limit counters are in memory and per function instance.
+- Run both services locally with `vercel dev`, or run them separately as described
+  above.
+
+### Alternative: separate API host (Render, Railway, Fly.io or any Node host)
 
 - **Render:** the repo includes [`render.yaml`](render.yaml). Choose *New →
   Blueprint*, pick this repo, then fill in the prompted values.
@@ -158,7 +196,9 @@ The media library refuses to delete an asset that any record still uses.
 - **Rate-limit storage:** it's in memory, which suits one instance. Use a shared
   store (for example Redis) if you scale out.
 
-### Frontend (Vercel)
+### Alternative: frontend as its own Vercel project
+
+Use this with a separately hosted API. Delete or ignore `vercel.json` for this setup.
 
 1. Import the repo on Vercel and set the **Root Directory** to `frontend/my-app`.
 2. Environment variables:

@@ -4,10 +4,44 @@ import { contactSchema } from "@/features/contact/contact-schema";
 import { postSchema } from "@/features/admin/pages/blog-editor";
 import { projectSchema } from "@/features/admin/pages/project-editor";
 import { experienceSchema } from "@/features/admin/pages/experience";
+import { serverApiUrl } from "./api/config";
 import { isKnownTag } from "./api/tags";
 import cloudinaryLoader from "./cloudinary-loader";
 import { formatRange, paragraphs, slugify } from "./format";
 import { fieldErrors } from "./validation";
+
+describe("serverApiUrl", () => {
+  const KEYS = ["API_INTERNAL_URL", "API_SERVICE_URL", "NEXT_PUBLIC_API_URL", "NEXT_PHASE", "VERCEL_PROJECT_PRODUCTION_URL"];
+  const withEnv = (env: Record<string, string>, fn: () => void) => {
+    const saved = Object.fromEntries(KEYS.map((k) => [k, process.env[k]]));
+    KEYS.forEach((k) => delete process.env[k]);
+    Object.assign(process.env, env);
+    try {
+      fn();
+    } finally {
+      KEYS.forEach((k) => (saved[k] === undefined ? delete process.env[k] : (process.env[k] = saved[k])));
+    }
+  };
+
+  it("defaults to the local API", () =>
+    withEnv({}, () => expect(serverApiUrl()).toBe("http://localhost:4000/api/v1")));
+
+  it("uses the Vercel service binding at runtime, adding the API prefix", () =>
+    withEnv({ API_SERVICE_URL: "https://api.internal.vercel/" }, () =>
+      expect(serverApiUrl()).toBe("https://api.internal.vercel/api/v1"),
+    ));
+
+  it("uses the production deployment during builds, when bindings don't resolve", () =>
+    withEnv(
+      { API_SERVICE_URL: "https://api.internal.vercel", NEXT_PHASE: "phase-production-build", VERCEL_PROJECT_PRODUCTION_URL: "manish.dev" },
+      () => expect(serverApiUrl()).toBe("https://manish.dev/api/v1"),
+    ));
+
+  it("lets an explicit API_INTERNAL_URL override everything", () =>
+    withEnv({ API_INTERNAL_URL: "http://127.0.0.1:4000/api/v1/", API_SERVICE_URL: "https://x" }, () =>
+      expect(serverApiUrl()).toBe("http://127.0.0.1:4000/api/v1"),
+    ));
+});
 
 describe("cloudinaryLoader", () => {
   it("injects width, format and quality transformations", () => {

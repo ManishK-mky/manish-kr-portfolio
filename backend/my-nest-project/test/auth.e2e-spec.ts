@@ -64,6 +64,22 @@ describe('Auth (e2e)', () => {
       .expect(403);
   });
 
+  it('accepts a same-origin refresh even when that origin is not allow-listed', async () => {
+    const res = await ctx
+      .http()
+      .post('/api/v1/auth/refresh')
+      .set('cookie', session.cookie)
+      .set(CSRF)
+      .set('host', 'preview-abc.vercel.app')
+      .set('origin', 'https://preview-abc.vercel.app')
+      .expect(200);
+    const rotated = ([] as string[])
+      .concat(res.headers['set-cookie'])
+      .find((c) => c.startsWith('pf_rt='))!
+      .split(';')[0];
+    session.cookie = rotated;
+  });
+
   it('rotates refresh tokens and revokes the session when an old token is replayed', async () => {
     const { cookie: first } = await ctx.login();
     const rotated = await ctx

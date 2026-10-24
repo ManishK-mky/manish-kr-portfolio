@@ -30,9 +30,12 @@ const nextConfig: NextConfig = {
     loaderFile: "./src/lib/cloudinary-loader.ts",
     remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],
   },
-  // Proxy the API through this origin so the refresh-token cookie is
-  // first-party in production (Vercel → API host) as well as locally.
+  // Local `next dev`/`next start`: proxy the API through this origin so the
+  // refresh-token cookie is first-party. On Vercel, /vercel.json routes
+  // /api/v1/* to the `api` service before requests reach Next.js, so no proxy
+  // is needed (and none should point at localhost).
   async rewrites() {
+    if (process.env.VERCEL) return [];
     return [{ source: "/api/v1/:path*", destination: `${backend}/:path*` }];
   },
   async headers() {
