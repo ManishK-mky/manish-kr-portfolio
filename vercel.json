@@ -11,7 +11,8 @@
     "api": {
       "root": "backend/my-nest-project",
       "framework": "nestjs",
-      "entrypoint": "src/main.ts"
+      "entrypoint": "src/main.ts",
+      "buildCommand": "npm run typecheck"
     }
   },
   "rewrites": [
