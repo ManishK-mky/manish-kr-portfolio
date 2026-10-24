@@ -19,4 +19,4 @@ async function bootstrap() {
     logger.warn('Cloudinary is not configured — media uploads are disabled.');
   }
 }
-await bootstrap();
+void bootstrap();
