@@ -150,7 +150,7 @@ The media library refuses to delete an asset that any record still uses.
 | Service | Root | Public paths | Calls |
 | --- | --- | --- | --- |
 | `web` (Next.js) | `frontend/my-app` | everything else (`/`) | `api`, via binding `API_SERVICE_URL` (server rendering) |
-| `api` (NestJS) | `backend/my-nest-project` | `/api/v1/*`, `/api/docs` | `web`, via binding `WEB_SERVICE_URL` (revalidation webhook) |
+| `api` (NestJS) | `backend/my-nest-project` | `/api/v1/*`, `/api/docs` | `web`'s public `/api/revalidate`, using Vercel's domain variables (a binding back would be circular, which Vercel rejects) |
 
 The browser calls `/api/v1` on the same origin, so cookies and CSRF checks work
 without any CORS setup, preview deployments included. Server-to-server calls go

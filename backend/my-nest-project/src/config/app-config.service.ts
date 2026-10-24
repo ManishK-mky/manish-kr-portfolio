@@ -61,15 +61,18 @@ export class AppConfigService {
   }
 
   /**
-   * Webhook target: an explicit FRONTEND_REVALIDATE_URL, otherwise the `web`
-   * service's internal URL from the Vercel service binding (WEB_SERVICE_URL,
-   * injected at runtime — read from process.env, not the validated config).
+   * Webhook target. An explicit FRONTEND_REVALIDATE_URL wins. On Vercel the
+   * site shares this deployment's domain, so the public URL is derived from
+   * Vercel's system variables. (A web ← api binding isn't possible: web already
+   * binds to api, and Vercel rejects circular bindings.)
    */
   get revalidation() {
     const explicit = this.config.get('FRONTEND_REVALIDATE_URL', { infer: true });
-    const bound = process.env.WEB_SERVICE_URL;
+    const { VERCEL_ENV, VERCEL_PROJECT_PRODUCTION_URL, VERCEL_URL } = process.env;
+    const host =
+      VERCEL_ENV === 'production' && VERCEL_PROJECT_PRODUCTION_URL ? VERCEL_PROJECT_PRODUCTION_URL : VERCEL_URL;
     return {
-      url: explicit || (bound ? new URL('/api/revalidate', bound).toString() : undefined),
+      url: explicit || (host ? `https://${host}/api/revalidate` : undefined),
       secret: this.config.get('REVALIDATE_SECRET', { infer: true }),
     };
   }

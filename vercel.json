@@ -11,10 +11,7 @@
     "api": {
       "root": "backend/my-nest-project",
       "framework": "nestjs",
-      "entrypoint": "src/main.ts",
-      "bindings": [
-        { "type": "service", "service": "web", "format": "url", "env": "WEB_SERVICE_URL" }
-      ]
+      "entrypoint": "src/main.ts"
     }
   },
   "rewrites": [
