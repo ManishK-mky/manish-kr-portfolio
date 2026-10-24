@@ -3,11 +3,11 @@ import { APP_GUARD } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { createObserveModule } from '@nestjs/observe';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module.js';
 import { BlogModule } from './blog/blog.module.js';
 import { CommonModule } from './common/common.module.js';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware.js';
+import { RateLimitGuard } from './common/rate-limit/rate-limit.guard.js';
 import { CompaniesModule } from './companies/companies.module.js';
 import { AppConfigService } from './config/app-config.service.js';
 import { AppConfigModule } from './config/config.module.js';
@@ -56,7 +56,6 @@ export const observeEnabled = Boolean(
         serverSelectionTimeoutMS: 10_000,
       }),
     }),
-    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
     ScheduleModule.forRoot(),
     CommonModule,
     MediaModule,
@@ -75,7 +74,7 @@ export const observeEnabled = Boolean(
     DashboardModule,
     HealthModule,
   ],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [{ provide: APP_GUARD, useClass: RateLimitGuard }],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

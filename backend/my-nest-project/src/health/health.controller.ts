@@ -1,7 +1,7 @@
 import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { SkipThrottle } from '@nestjs/throttler';
+import { SkipRateLimit } from '../common/rate-limit/rate-limit.guard.js';
 import type { Response } from 'express';
 import type { Connection } from 'mongoose';
 import { Public } from '../common/decorators/public.decorator.js';
@@ -19,7 +19,7 @@ export class HealthController {
   constructor(@InjectConnection() private readonly connection: Connection) {}
 
   @Public()
-  @SkipThrottle()
+  @SkipRateLimit()
   @Get()
   @ApiOperation({ summary: 'Liveness and database connectivity' })
   check(@Res({ passthrough: true }) res: Response) {

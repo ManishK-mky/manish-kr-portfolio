@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
+import { RateLimit } from '../common/rate-limit/rate-limit.guard.js';
 import { AdminOnly } from '../common/decorators/admin.decorator.js';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe.js';
 import {
@@ -27,7 +27,7 @@ export class MediaController {
   constructor(private readonly media: MediaService) {}
 
   @Post('signature')
-  @Throttle({ default: { limit: 60, ttl: 60_000 } })
+  @RateLimit(60, 60_000)
   @ApiOperation({ summary: 'Get signed parameters for a direct Cloudinary upload' })
   signature(@Body() dto: SignatureRequestDto) {
     return this.media.createSignature(dto);

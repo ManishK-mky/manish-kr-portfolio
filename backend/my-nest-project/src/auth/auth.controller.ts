@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
+import { RateLimit } from '../common/rate-limit/rate-limit.guard.js';
 import type { CookieOptions, Request, Response } from 'express';
 import { AdminOnly } from '../common/decorators/admin.decorator.js';
 import {
@@ -44,7 +44,7 @@ export class AuthController {
   ) {}
 
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @RateLimit(5, 60_000)
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Sign in; sets an HttpOnly refresh-token cookie' })
@@ -64,7 +64,7 @@ export class AuthController {
 
   @Public()
   @UseGuards(CsrfGuard)
-  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @RateLimit(30, 60_000)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @csrfHeaderDoc
@@ -109,7 +109,7 @@ export class AuthController {
 
   @Patch('password')
   @AdminOnly()
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @RateLimit(5, 60_000)
   @ApiOperation({ summary: 'Change password and sign out other sessions' })
   async changePassword(
     @CurrentUser() user: AuthUser & { sid: string },

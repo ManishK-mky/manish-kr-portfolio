@@ -12,7 +12,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
+import { RateLimit } from '../common/rate-limit/rate-limit.guard.js';
 import { AdminOnly } from '../common/decorators/admin.decorator.js';
 import { Public } from '../common/decorators/public.decorator.js';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe.js';
@@ -27,7 +27,7 @@ export class ContactController {
   @Public()
   @Post()
   @HttpCode(HttpStatus.ACCEPTED)
-  @Throttle({ default: { limit: 5, ttl: 10 * 60_000 } })
+  @RateLimit(5, 10 * 60_000)
   @ApiOperation({ summary: 'Send a message (rate limited, spam filtered)' })
   submit(@Body() dto: CreateContactDto, @Headers('user-agent') userAgent?: string) {
     return this.contact.submit(dto, userAgent);
