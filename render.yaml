@@ -1,0 +1,37 @@
+# Render Blueprint for the API. In the Render dashboard: New → Blueprint →
+# select this repository. Fill in the `sync: false` values when prompted.
+services:
+  - type: web
+    name: portfolio-api
+    runtime: node
+    rootDir: backend/my-nest-project
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/main.js
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: TRUST_PROXY
+        value: 2 # Render's proxy + Vercel's rewrite proxy
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false # e.g. https://your-site.vercel.app,https://yourdomain.com
+      - key: FRONTEND_REVALIDATE_URL
+        sync: false # e.g. https://yourdomain.com/api/revalidate
+      - key: REVALIDATE_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
