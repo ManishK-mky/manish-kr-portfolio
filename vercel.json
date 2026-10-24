@@ -5,19 +5,38 @@
       "root": "frontend/my-app",
       "framework": "nextjs",
       "bindings": [
-        { "type": "service", "service": "api", "format": "url", "env": "API_SERVICE_URL" }
+        {
+          "type": "service",
+          "service": "api",
+          "format": "url",
+          "env": "API_SERVICE_URL"
+        }
       ]
     },
     "api": {
       "root": "backend/my-nest-project",
       "framework": "nestjs",
-      "entrypoint": "src/main.ts",
-      "buildCommand": "npm run typecheck"
+      "entrypoint": "src/main.ts"
     }
   },
   "rewrites": [
-    { "source": "/api/v1/(.*)", "destination": { "service": "api" } },
-    { "source": "/api/docs(.*)", "destination": { "service": "api" } },
-    { "source": "/(.*)", "destination": { "service": "web" } }
+    {
+      "source": "/api/v1/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/api/docs(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "web"
+      }
+    }
   ]
 }
